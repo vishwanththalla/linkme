@@ -8,6 +8,8 @@ import (
 	"github.com/joho/godotenv"
 
 	"github.com/vishwanththalla/linkme/internal/database"
+    "github.com/vishwanththalla/linkme/internal/handlers"
+
 )
 
 func main() {
@@ -19,10 +21,13 @@ func main() {
 	database.Connect()
 
 	router := gin.Default()
+    
 
 	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "Server running 🚀"})
 	})
+    
+    router.POST("/register", handlers.Register)
 
 	port := os.Getenv("PORT")
 	if port == "" {

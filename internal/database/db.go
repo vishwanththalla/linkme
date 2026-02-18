@@ -1,4 +1,3 @@
-// Database connection setup
 package database
 
 import (
@@ -6,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/vishwanththalla/linkme/internal/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -28,5 +28,13 @@ func Connect() {
 	}
 
 	DB = db
+
+	log.Println("Running auto migration...")
+
+	err = DB.AutoMigrate(&models.User{})
+	if err != nil {
+		log.Fatal("Failed to migrate database:", err)
+	}
+
 	log.Println("Database connected successfully")
 }
