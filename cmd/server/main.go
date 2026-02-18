@@ -9,6 +9,8 @@ import (
 
 	"github.com/vishwanththalla/linkme/internal/database"
     "github.com/vishwanththalla/linkme/internal/handlers"
+    "github.com/vishwanththalla/linkme/internal/middleware"
+
 
 )
 
@@ -22,15 +24,23 @@ func main() {
 
 	router := gin.Default()
     
+    router.POST("/login", handlers.Login)
 
 	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "Server running 🚀"})
 	})
-    
+
     router.POST("/register", handlers.Register)
 
-	port := os.Getenv("PORT")
-	if port == "" {
+
+    auth := router.Group("/")
+    auth.Use(middleware.AuthMiddleware())
+    {
+        auth.POST("/links", handlers.CreateLink)
+        auth.GET("/links", handlers.GetLinks)
+        auth.PUT("/links/:id", handlers.UpdateLink)
+        auth.DELETE("/links/:id", handlers.DeleteLink)
+    }
 		port = "8080"
 	}
 

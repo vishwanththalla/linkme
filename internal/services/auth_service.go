@@ -29,3 +29,23 @@ func RegisterUser(email, password string) error {
 
 	return database.DB.Create(&user).Error
 }
+
+func LoginUser(email, password string) (string, error) {
+	var user models.User
+
+	result := database.DB.Where("email = ?", email).First(&user)
+	if result.Error != nil {
+		return "", errors.New("invalid credentials")
+	}
+
+	if !utils.CheckPassword(password, user.Password) {
+		return "", errors.New("invalid credentials")
+	}
+
+	token, err := utils.GenerateJWT(user.ID)
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
+}
