@@ -1,0 +1,12 @@
+# render.yaml
+
+services:
+  - type: "web"  
+    name: "linkme"  
+    env: "go"
+    plan: "free"
+    buildCommand: "go build -o server cmd/server/main.go"
+    startCommand: "./server"
+    envVars:
+      - key: "PORT"
+        value: "{{ render.port }}"
