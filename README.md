@@ -10,6 +10,7 @@ for main = runs your API
 go run cmd/server/main.go
 
 
+
 curl commands
 
 create a new user 
@@ -52,3 +53,22 @@ curl -X PUT http://localhost:8080/links/1 \
 
 
 #######################
+
+Front end
+
+cd frontend
+npm run dev
+
+http://localhost:5173
+
+
+
+Back End
+
+go run ./cmd/server
+http://localhost:8080
+
+run the docker 
+
+docker-compose down
+docker-compose up --build

@@ -38,7 +38,7 @@ func LoginUser(email, password string) (string, error) {
 		return "", errors.New("invalid credentials")
 	}
 
-	if !utils.CheckPassword(password, user.Password) {
+	if !utils.CheckPasswordHash(password, user.Password) {
 		return "", errors.New("invalid credentials")
 	}
 

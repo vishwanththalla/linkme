@@ -18,24 +18,41 @@ func CreateLink(c *gin.Context) {
 	var input CreateLinkInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-        respondError(c, http.StatusBadRequest, err.Error())
-        return
-    }
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
-    userID := getUserID(c)
+	userID := c.GetUint("user_id")
 
-    if err := services.CreateLink(input.Title, input.URL, userID); err != nil {
-        respondError(c, http.StatusInternalServerError, err.Error())
+	err := services.CreateLink(input.Title, input.URL, userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Link created successfully"})
 }
 
 func GetLinks(c *gin.Context) {
-    userID := getUserID(c)
+	userID := c.GetUint("user_id")
 
-    page, limit := parsePagination(c)
+	pageStr := c.DefaultQuery("page", "1")
+	limitStr := c.DefaultQuery("limit", "10")
 
-    links, err := services.GetUserLinks(userID, page, limit)
-    if err != nil {
-        respondError(c, http.StatusInternalServerError, "failed to fetch links")
+	page, _ := strconv.Atoi(pageStr)
+	limit, _ := strconv.Atoi(limitStr)
+
+	if page < 1 {
+		page = 1
+	}
+	if limit < 1 || limit > 100 {
+		limit = 10
+	}
+
+	links, err := services.GetUserLinks(userID, page, limit)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch links"})
+		return
 	}
 
 	c.JSON(http.StatusOK, links)
@@ -48,38 +65,44 @@ type UpdateLinkInput struct {
 
 func UpdateLink(c *gin.Context) {
 	linkIDParam := c.Param("id")
-    userID := getUserID(c)
+	userID := c.GetUint("user_id")
 
-    var input UpdateLinkInput
-    if err := c.ShouldBindJSON(&input); err != nil {
-        respondError(c, http.StatusBadRequest, err.Error())
-        return
-    }
+	var input UpdateLinkInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
-    linkID, err := strconv.Atoi(linkIDParam)
-    if err != nil {
-        respondError(c, http.StatusBadRequest, "invalid link id")
-        return
-    }
+	linkID, err := strconv.Atoi(linkIDParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid link id"})
+		return
+	}
 
-    if err := services.UpdateLink(uint(linkID), input.Title, input.URL, userID); err != nil {
-        respondError(c, http.StatusNotFound, "link not found")
+	err = services.UpdateLink(uint(linkID), input.Title, input.URL, userID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "link not found"})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Link updated"})
 }
 
 func DeleteLink(c *gin.Context) {
 	linkIDParam := c.Param("id")
-    userID := getUserID(c)
+	userID := c.GetUint("user_id")
 
-    linkID, err := strconv.Atoi(linkIDParam)
-    if err != nil {
-        respondError(c, http.StatusBadRequest, "invalid link id")
-        return
-    }
+	linkID, err := strconv.Atoi(linkIDParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid link id"})
+		return
+	}
 
-    if err := services.DeleteLink(uint(linkID), userID); err != nil {
-        respondError(c, http.StatusNotFound, "link not found")
+	err = services.DeleteLink(uint(linkID), userID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "link not found"})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Link deleted"})
 }

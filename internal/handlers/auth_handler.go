@@ -17,12 +17,13 @@ func Register(c *gin.Context) {
 	var input RegisterInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		respondError(c, http.StatusBadRequest, err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := services.RegisterUser(input.Email, input.Password); err != nil {
-		respondError(c, http.StatusBadRequest, err.Error())
+	err := services.RegisterUser(input.Email, input.Password)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -38,13 +39,13 @@ func Login(c *gin.Context) {
 	var input LoginInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		respondError(c, http.StatusBadRequest, err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	token, err := services.LoginUser(input.Email, input.Password)
 	if err != nil {
-		respondError(c, http.StatusUnauthorized, err.Error())
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 
