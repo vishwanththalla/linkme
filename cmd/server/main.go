@@ -7,7 +7,6 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 
 	"github.com/vishwanththalla/linkme/internal/database"
 	"github.com/vishwanththalla/linkme/internal/handlers"
@@ -16,12 +15,6 @@ import (
 )
 
 func main() {
-
-	// Load .env (optional inside Docker)
-	err := godotenv.Load()
-	if err != nil {
-		log.Println("No .env file found, using environment variables")
-	}
 
 	// Connect DB
 	db := database.Connect()
